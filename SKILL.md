@@ -231,6 +231,60 @@ Load only what the current request needs.
 
 ---
 
+
+## Machine-Readable Model Blueprint
+
+The Markdown plan is the human-readable contract. When a downstream tool, agent, or exporter needs structured geometry, also produce a **Model Blueprint** conforming to `schemas/model-blueprint.schema.json`.
+
+Use three output modes:
+
+- **human** — the standard 10-section Markdown plan.
+- **blueprint** — strict JSON only, suitable for procedural generators and exporters.
+- **both** — Markdown plan followed by the JSON blueprint.
+
+The blueprint is software-independent. It describes coordinate systems, parts, primitives, transforms, topology, materials, polygon estimates, symmetry, repetition, and procedural variation without assuming a DCC or engine.
+
+### Blueprint rules
+
+1. Every part has a stable `id` and explicit dimensions/transform where applicable.
+2. Measurements use the plan's declared unit and coordinate system.
+3. Material definitions are referenced by ID rather than duplicated per part.
+4. Unknown values are represented with an explicit status such as `observed`, `inferred`, or `recommended`; never silently invented.
+5. Repeated parts should use symmetry/instances rather than duplicating equivalent definitions.
+6. Procedural variation may specify a deterministic seed and bounded ranges.
+7. Polygon estimates are estimates unless an actual mesh is available.
+
+## Geometry Validation
+
+Before delivering a plan or blueprint, perform these checks when enough numeric information exists:
+
+- stacked dimensions agree with the stated overall bounding box;
+- mirrored parts use equal dimensions and opposite coordinates on the mirror axis;
+- mating parts touch or intentionally overlap;
+- dimensions and material values are within valid ranges;
+- estimated triangles are reasonably consistent with the stated budget;
+- every referenced material and part ID exists;
+- the coordinate convention is stated exactly once and used consistently.
+
+Use `python scripts/validate_blueprint.py <file.json>` for structured blueprints and `python scripts/validate_plan.py <file.md>` for Markdown plans.
+
+## Dimension Library
+
+Use the dimension references as **starting ranges**, not universal truths. Prefer object-specific, reference-derived measurements when an image or real-world specification exists. For common asset families, consult:
+
+- `references/dimensions/trees.md`
+- `references/dimensions/rocks-and-mountains.md`
+- `references/dimensions/buildings.md`
+- `references/dimensions/props.md`
+- `references/dimensions/vehicles.md`
+- `references/dimensions/characters.md`
+
+For procedural assets, preserve a base template and expose controlled variation instead of inventing unrelated dimensions for every instance.
+
+## Reference Routing Update
+
+When the request is primarily procedural, read `references/07-procedural-and-symmetry.md` and use a deterministic seed when reproducibility matters. When terrain is the subject, also read `references/dimensions/rocks-and-mountains.md`. When a machine-readable result is requested, read `schemas/model-blueprint.schema.json` before generating it.
+
 ## Quick Start (minimum viable plan)
 
 If you must be brief, still deliver: coordinate system + base unit, component table with dimensions and positions, numbered construction steps, material table with hex colors, shading mode per component, triangle estimate, and the validation checklist. Never drop Sections 1, 4, 5, 7, 9.
