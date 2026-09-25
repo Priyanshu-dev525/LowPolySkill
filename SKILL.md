@@ -281,6 +281,98 @@ Use the dimension references as **starting ranges**, not universal truths. Prefe
 
 For procedural assets, preserve a base template and expose controlled variation instead of inventing unrelated dimensions for every instance.
 
+## Organic Randomness and Natural Asymmetry
+
+For organic assets such as trees, bushes, rocks, plants, terrain, clouds, coral, creatures, and hand-shaped props, **do not produce perfectly symmetric or evenly distributed geometry unless the reference explicitly requires it**.
+
+The goal is **controlled irregularity**: the asset should feel intentionally designed but not mathematically repeated.
+
+### Natural variation rules
+
+1. **Break radial symmetry.** Do not place repeated parts at equal angles around the center. Vary azimuth, elevation, and distance from the center.
+2. **Break size repetition.** Repeated elements must use varied scale. Prefer a bounded distribution such as 0.75–1.25× rather than identical copies.
+3. **Break vertical alignment.** Avoid stacking every element on the same height. Use several height bands with overlap in their ranges.
+4. **Break orientation repetition.** Rotate organic pieces independently within a controlled range. Avoid identical rotations.
+5. **Use deterministic randomness.** If procedural variation is used, define a seed so the result is reproducible. Different seeds may produce variants.
+6. **Preserve a designed silhouette.** Randomness must not destroy the major silhouette, center of mass, contact with the ground, or recognizability.
+7. **Keep the trunk/core readable.** For trees and similar clustered assets, foliage should not form a perfectly spherical shell around the trunk. Leave intentional openings and vary foliage density so the trunk/branches can be seen where appropriate.
+8. **Use hierarchical variation.** First establish the large silhouette, then place secondary masses, then add small irregularities. Do not randomize everything independently.
+9. **Avoid mirrored pairs.** If two elements are conceptually mirrored, introduce small differences in scale, rotation, position, or shape unless symmetry is required.
+10. **Avoid uniform spacing.** Repeated elements should have a minimum spacing constraint plus controlled jitter, not a perfect grid or ring.
+
+### Tree / foliage clustering recipe
+
+For a low-poly tree made from multiple foliage masses:
+
+- Build the trunk first and establish the overall crown envelope.
+- Define 3–6 vertical foliage bands rather than one symmetric sphere.
+- Give each foliage mass a different scale, rotation, and position.
+- Bias larger masses toward the lower/middle crown and smaller masses toward the top, unless the species/reference suggests otherwise.
+- Offset the crown center from the trunk center slightly.
+- Use a small number of intentionally dominant masses and several supporting masses rather than many identical blobs.
+- Prefer irregular low-poly spheres/icospheres with per-instance deformation or non-uniform scale over identical primitives.
+- Randomize within limits; never use unrestricted noise that creates spikes, holes, or an unstable silhouette.
+
+The final crown should have a **recognizable but uneven silhouette** from the intended camera distance.
+
+## Controlled Intersection and Collision Rules
+
+Organic low-poly assets may use **intentional shallow interpenetration** to avoid visible gaps between separate pieces, but uncontrolled intersections are an error.
+
+### Default rules
+
+- Never allow unrelated parts to deeply intersect merely because they overlap visually.
+- Never leave visible gaps between parts that should form one continuous mass.
+- Do not allow foliage masses to pass deeply through the trunk, branches, or one another.
+- Avoid coplanar surfaces and near-zero-distance faces that can cause z-fighting.
+- When separate low-poly masses are used, their intersection should be shallow and hidden from the intended view whenever possible.
+- Prefer contact/near-contact or controlled overlap over deep penetration.
+- If a piece must intersect another piece for construction reasons, state it explicitly in Assembly.
+
+### Foliage collision heuristic
+
+For two approximately spherical foliage masses with radii r1 and r2, let d be the distance between their centers.
+
+- d >= r1 + r2: separated; use only when a visible gap is intentional.
+- 0.85 × (r1 + r2) <= d < r1 + r2: preferred shallow overlap/contact region.
+- d < 0.85 × (r1 + r2): treat as excessive penetration and reposition, resize, or merge the masses unless the reference clearly requires it.
+
+This is a heuristic, not a universal physical law. Irregular meshes require visual inspection of the actual silhouette and intersection.
+
+### Procedural placement algorithm
+
+When placing repeated organic masses, use this sequence:
+
+1. Generate a candidate position from the intended crown/cluster envelope.
+2. Apply bounded position, scale, and rotation jitter.
+3. Calculate the candidate's approximate bounding radius/box.
+4. Compare it with nearby existing masses.
+5. Reject or move candidates that exceed the allowed intersection depth.
+6. Reject candidates that create obvious silhouette spikes, holes, or detached pieces.
+7. Accept the candidate only after both **collision spacing** and **silhouette readability** pass.
+8. Run a final global pass for trunk visibility, ground contact, center of mass, and overall asymmetry.
+
+For procedural systems, prefer seeded rejection sampling / constrained placement over unconstrained random placement.
+
+## Organic Asset Quality Gate
+
+Before declaring an organic low-poly asset finished, explicitly check:
+
+- [ ] It is not accidentally mirror-symmetric.
+- [ ] Repeated parts do not all have identical dimensions.
+- [ ] Repeated parts do not share identical rotations.
+- [ ] The silhouette has controlled irregularity rather than random noise.
+- [ ] The largest masses establish the silhouette before small details are added.
+- [ ] No major foliage/rock/cluster masses deeply intersect without a stated reason.
+- [ ] No obvious z-fighting or nearly coplanar surfaces exist.
+- [ ] No accidental floating parts exist.
+- [ ] Ground/contact points are stable.
+- [ ] The trunk/core/primary structure remains readable where appropriate.
+- [ ] The asset still reads correctly from the intended camera distance.
+- [ ] The procedural result is reproducible when a seed is specified.
+
+A low-poly organic asset is **not finished merely because the triangle count is low**. It is finished when its silhouette, asymmetry, spacing, intersections, and visual hierarchy all look intentional.
+
 ## Reference Routing Update
 
 When the request is primarily procedural, read `references/07-procedural-and-symmetry.md` and use a deterministic seed when reproducibility matters. When terrain is the subject, also read `references/dimensions/rocks-and-mountains.md`. When a machine-readable result is requested, read `schemas/model-blueprint.schema.json` before generating it.
